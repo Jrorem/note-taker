@@ -1,4 +1,4 @@
-const router = require("express").Router()
+const router = require('express').Router()
 const { v4: uuidv4 } = require('uuid');
 const {
    readFromFile, 
@@ -6,25 +6,36 @@ const {
    writeToFile,
 } = require('../helpers/fsUtils');
 
-router.get('/', (req, res) => {
-   readFromFile('./db/db.json').then((data) => res.json(JSON.parse(data)));
+router.get('/notes', (req, res) => {
+   readFromFile('./db/db.json')
+   .then((data) => res.json(JSON.parse(data)))
+   .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to retrieve note'});
+   })
 });
 
-router.post('/', (req, res) => {
-   console.log(req.body);
+router.post('/notes', (req, res) => {
 
-   const { note } = req.body;
+   const { title, text } = req.body;
 
-   if (req.body) {
+   if (title && text) {
       const newNote = {
-         note,
+         title,
+         text,
          noteId: uuidv4(),
       };
       
-      readAndAppend(newNote, './db/db.json');
-      res.json('Note added succesfully');
+      readAndAppend(newNote, './db/db.json')
+      .then(() => {
+         res.json('Note added succesfully');
+      })
+      .catch((err) => {
+         console.error(err);
+         
+      })
    } else {
-      res.errored('Failed to add note')
+      res.status('Failed to add note')
    }
 });
 
