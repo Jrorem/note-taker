@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const noteRoutes = require("./routes/noteRoutes")
+const noteRoutes = require("./routes/noteRoutes.js")
 
 
 const router = express();
@@ -16,9 +16,10 @@ router.get('/notes', (req, res) =>
 );
 
 router.get('/', (req, res) => 
-res.sendFile(path.join(__dirname, './public/index.html'))
+res.sendFile(path.join(__dirname, './index.html'))
 );
 
 
 
 router.listen(PORT, () => console.log("welcome to localhost:${PORT}"))
+

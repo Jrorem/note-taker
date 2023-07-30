@@ -1,4 +1,4 @@
-const router = require('express').Router()
+const router = require('express').Router();
 const { v4: uuidv4 } = require('uuid');
 const {
    readFromFile, 
@@ -6,7 +6,9 @@ const {
    writeToFile,
 } = require('../helpers/fsUtils');
 
+
 router.get('/notes', (req, res) => {
+   const noteId = req.params.id;
    readFromFile('./db/db.json')
    .then((data) => res.json(JSON.parse(data)))
    .catch((err) => {
@@ -14,6 +16,21 @@ router.get('/notes', (req, res) => {
       res.status(500).json({ error: 'Failed to retrieve note'});
    })
 });
+
+router.get('/notes/:noteId', (req, res) => {
+   const noteId = req.params.id;
+   readFromFile('./db/db.json')
+     .then((data) => JSON.parse(data))
+     .then((json) => {
+      
+       const result = json.filter((note) => note.id.toString() === noteId);
+       return result.length > 0
+         ? res.json(result)
+         : res.json('note not found');
+     });
+ });
+
+
 
 router.post('/notes', (req, res) => {
 
@@ -29,15 +46,31 @@ router.post('/notes', (req, res) => {
       readAndAppend(newNote, './db/db.json')
       .then(() => {
          res.json('Note added succesfully');
+         console.log(newNote.noteId);
       })
       .catch((err) => {
          console.error(err);
+         res.status(500).json({ error: 'Failed to add note'});
          
       })
    } else {
-      res.status('Failed to add note')
+      res.status(400)({ error: 'Failed to add note, title and text required'});;
    }
 });
 
+notes.delete('/:id', (req, res) => {
+   const noteId = req.params.id;
+   readFromFile('./db/notes.json')
+     .then((data) => JSON.parse(data))
+     .then((json) => {
+
+       const result = json.filter((note) => note.id !== noteId);
+ 
+       writeToFile('./db/notes.json', result);
+       res.json(`Item ${noteId} has been deleted`);
+     });
+ });
+
 
 module.exports = router;
+
